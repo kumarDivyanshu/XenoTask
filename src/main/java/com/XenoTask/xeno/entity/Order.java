@@ -70,6 +70,7 @@ public class Order {
     private String currency;
 
     @Column(name = "confirmed")
+    @Builder.Default
     private Boolean confirmed = Boolean.TRUE;
 
     @Column(name = "created_at")

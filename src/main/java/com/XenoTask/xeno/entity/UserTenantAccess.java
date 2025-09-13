@@ -32,6 +32,7 @@ public class UserTenantAccess {
     private Tenant tenant;
 
     @Column(name = "role", length = 50)
+    @Builder.Default
     private String role = "admin"; // admin, viewer, etc.
 
     @Column(name = "created_at", insertable = false, updatable = false)

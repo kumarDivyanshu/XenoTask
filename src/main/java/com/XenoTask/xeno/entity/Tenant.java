@@ -43,6 +43,7 @@ public class Tenant {
     private LocalDateTime updatedAt;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = Boolean.TRUE;
 
     @Column(name = "plan_name", length = 100)

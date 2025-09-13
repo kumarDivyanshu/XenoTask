@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -19,16 +20,19 @@ import java.io.IOException;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class MultiTenantFilter implements Filter {
-    public static final String TENANT_HEADER = "X-Tenant-ID";
-    public static final String SHOP_HEADER = "X-Shop-Domain";
+    @Value("${multitenancy.headers.tenant:X-Tenant-ID}")
+    private String tenantHeader;
+
+    @Value("${multitenancy.headers.shop:X-Shop-Domain}")
+    private String shopHeader;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
             if (request instanceof HttpServletRequest http) {
-                String tenantId = http.getHeader(TENANT_HEADER);
+                String tenantId = http.getHeader(tenantHeader);
                 if (tenantId == null || tenantId.isBlank()) {
-                    tenantId = http.getHeader(SHOP_HEADER); // may be shop domain, translation done in service methods
+                    tenantId = http.getHeader(shopHeader); // may be shop domain, translation done in service methods
                 }
                 if (tenantId != null && !tenantId.isBlank()) {
                     TenantContext.setTenantId(tenantId.trim());
@@ -40,4 +44,3 @@ public class MultiTenantFilter implements Filter {
         }
     }
 }
-

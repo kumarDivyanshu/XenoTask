@@ -24,11 +24,13 @@ public class UserService {
     }
 
     public UserDetails loadUserByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        boolean enabled = user.getIsActive() == null || user.getIsActive();
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),
-                user.getIsActive() != null && user.getIsActive(),
+                enabled,
                 true,true,true,
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
@@ -36,7 +38,9 @@ public class UserService {
 
     @Transactional
     public User register(String email, String rawPassword) {
-        if (userRepository.existsByEmail(email)) throw new IllegalStateException("Email already used");
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalStateException("Email already used");
+        }
         User u = User.builder()
                 .email(email)
                 .passwordHash(passwordEncoder.encode(rawPassword))
@@ -47,7 +51,6 @@ public class UserService {
 
     @Transactional
     public void updateLastLogin(String email) {
-        userRepository.findByEmail(email).ifPresent(u -> u.setLastLogin(java.time.LocalDateTime.now()));
+        userRepository.findByEmailIgnoreCase(email).ifPresent(u -> u.setLastLogin(java.time.LocalDateTime.now()));
     }
 }
-

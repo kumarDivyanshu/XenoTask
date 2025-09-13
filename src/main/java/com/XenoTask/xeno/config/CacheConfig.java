@@ -1,5 +1,6 @@
 package com.xenotask.xeno.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -16,18 +17,29 @@ import java.util.Map;
 @EnableCaching
 public class CacheConfig {
 
+    @Value("${cache.ttl.default:PT5M}")
+    private Duration defaultTtl;
+    @Value("${cache.ttl.revenue.daily:PT2M}")
+    private Duration revenueDailyTtl;
+    @Value("${cache.ttl.revenue.range:PT10M}")
+    private Duration revenueRangeTtl;
+    @Value("${cache.ttl.orders.statusBreakdown:PT1H}")
+    private Duration ordersStatusBreakdownTtl;
+    @Value("${cache.ttl.customers.top:PT120M}")
+    private Duration customersTopTtl;
+
     @Bean
     public CacheManager cacheManager(LettuceConnectionFactory redisConnectionFactory) {
         // default TTL
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(5));
+                .entryTtl(defaultTtl);
 
         // custom TTL per cache
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
-        cacheConfigs.put("revenue:daily", RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(2)));
-        cacheConfigs.put("revenue:range", RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(10)));
-        cacheConfigs.put("orders:statusBreakdown", RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1)));
-        cacheConfigs.put("customers:top", RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(120)));
+        cacheConfigs.put("revenue:daily", RedisCacheConfiguration.defaultCacheConfig().entryTtl(revenueDailyTtl));
+        cacheConfigs.put("revenue:range", RedisCacheConfiguration.defaultCacheConfig().entryTtl(revenueRangeTtl));
+        cacheConfigs.put("orders:statusBreakdown", RedisCacheConfiguration.defaultCacheConfig().entryTtl(ordersStatusBreakdownTtl));
+        cacheConfigs.put("customers:top", RedisCacheConfiguration.defaultCacheConfig().entryTtl(customersTopTtl));
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultConfig)

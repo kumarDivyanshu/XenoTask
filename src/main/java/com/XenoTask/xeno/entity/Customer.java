@@ -46,15 +46,18 @@ public class Customer {
     private String phone;
 
     @Column(name = "accepts_marketing")
+    @Builder.Default
     private Boolean acceptsMarketing = Boolean.FALSE;
 
     @Column(name = "state", length = 50)
     private String state;
 
     @Column(name = "total_spent", precision = 15, scale = 2)
+    @Builder.Default
     private BigDecimal totalSpent = BigDecimal.ZERO;
 
     @Column(name = "orders_count")
+    @Builder.Default
     private Integer ordersCount = 0;
 
     @Column(name = "created_at", insertable = false, updatable = false)

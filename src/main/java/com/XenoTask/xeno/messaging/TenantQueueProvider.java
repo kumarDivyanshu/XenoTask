@@ -1,6 +1,5 @@
 package com.xenotask.xeno.messaging;
 
-import com.xenotask.xeno.config.RabbitConfig;
 import com.xenotask.xeno.entity.Tenant;
 import com.xenotask.xeno.service.TenantService;
 import jakarta.annotation.PostConstruct;
@@ -10,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -28,9 +28,18 @@ public class TenantQueueProvider {
 
     private final List<String> queueNames = new CopyOnWriteArrayList<>();
 
+    @Value("${sync.messaging.queue-prefix:sync.jobs.}")
+    private String queuePrefix;
+
+    @Value("${sync.rabbit.dlx-exchange:sync.dlx}")
+    private String dlxExchange;
+
+    @Value("${sync.rabbit.dlq-routing-key:dlq}")
+    private String dlqRoutingKey;
+
     public String[] getQueueNames() { return queueNames.toArray(new String[0]); }
 
-    private String queueName(String tenantId) { return "sync.jobs." + tenantId; }
+    private String queueName(String tenantId) { return queuePrefix + tenantId; }
 
     @PostConstruct
     public void init() {
@@ -47,8 +56,8 @@ public class TenantQueueProvider {
         String qn = queueName(tenantId);
         if (queueNames.contains(qn)) return;
         Map<String, Object> args = Map.of(
-                "x-dead-letter-exchange", RabbitConfig.DLX_EXCHANGE,
-                "x-dead-letter-routing-key", RabbitConfig.DLQ_ROUTING_KEY
+                "x-dead-letter-exchange", dlxExchange,
+                "x-dead-letter-routing-key", dlqRoutingKey
         );
         Queue q = QueueBuilder.durable(qn).withArguments(args).build();
         amqpAdmin.declareQueue(q);

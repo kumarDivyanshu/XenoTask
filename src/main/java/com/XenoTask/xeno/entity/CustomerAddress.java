@@ -49,5 +49,6 @@ public class CustomerAddress {
     private String zip;
 
     @Column(name = "is_default")
+    @Builder.Default
     private Boolean isDefault = Boolean.FALSE;
 }

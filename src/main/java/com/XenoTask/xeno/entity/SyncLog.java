@@ -33,6 +33,7 @@ public class SyncLog {
     private String status; // success, error, in_progress
 
     @Column(name = "records_processed")
+    @Builder.Default
     private Integer recordsProcessed = 0;
 
     @Lob

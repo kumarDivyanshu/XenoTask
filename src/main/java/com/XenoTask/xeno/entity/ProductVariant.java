@@ -48,15 +48,18 @@ public class ProductVariant {
     private String sku;
 
     @Column(name = "inventory_quantity")
+    @Builder.Default
     private Integer inventoryQuantity = 0;
 
     @Column(name = "weight", precision = 10, scale = 2)
     private BigDecimal weight;
 
     @Column(name = "requires_shipping")
+    @Builder.Default
     private Boolean requiresShipping = Boolean.TRUE;
 
     @Column(name = "taxable")
+    @Builder.Default
     private Boolean taxable = Boolean.TRUE;
 
     @Column(name = "created_at")

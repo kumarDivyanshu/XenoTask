@@ -51,6 +51,7 @@ public class OrderLineItem {
     private BigDecimal price;
 
     @Column(name = "total_discount", precision = 15, scale = 2)
+    @Builder.Default
     private BigDecimal totalDiscount = BigDecimal.ZERO;
 
     @Column(name = "sku", length = 255)

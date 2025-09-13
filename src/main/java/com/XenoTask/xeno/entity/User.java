@@ -34,6 +34,7 @@ public class User {
     private String lastName;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = Boolean.TRUE;
 
     @Column(name = "created_at", insertable = false, updatable = false)

@@ -30,7 +30,10 @@ public class SyncJobScheduler {
     @Value("${sync.scheduler.cron:0 0/30 * * * *}")
     private String cronExpression; // for documentation only
 
-    private String queueName(String tenantId) { return "sync.jobs." + tenantId; }
+    @Value("${sync.messaging.queue-prefix:sync.jobs.}")
+    private String queuePrefix;
+
+    private String queueName(String tenantId) { return queuePrefix + tenantId; }
 
     // Runs per schedule (default every 30 minutes). Use sync.scheduler.cron to override.
     @Scheduled(cron = "${sync.scheduler.cron:0 0/30 * * * *}")
