@@ -17,15 +17,15 @@ import java.util.Map;
 @EnableCaching
 public class CacheConfig {
 
-    @Value("${cache.ttl.default:PT5M}")
+    @Value("${cache.ttl.default:PT2M}")
     private Duration defaultTtl;
     @Value("${cache.ttl.revenue.daily:PT2M}")
     private Duration revenueDailyTtl;
-    @Value("${cache.ttl.revenue.range:PT10M}")
+    @Value("${cache.ttl.revenue.range:PT2M}")
     private Duration revenueRangeTtl;
-    @Value("${cache.ttl.orders.statusBreakdown:PT1H}")
+    @Value("${cache.ttl.orders.statusBreakdown:PT2M}")
     private Duration ordersStatusBreakdownTtl;
-    @Value("${cache.ttl.customers.top:PT120M}")
+    @Value("${cache.ttl.customers.top:PT2M}")
     private Duration customersTopTtl;
 
     @Bean
