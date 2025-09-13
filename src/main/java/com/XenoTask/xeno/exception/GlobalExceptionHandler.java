@@ -1,5 +1,6 @@
 package com.xenotask.xeno.exception;
 
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
         body.put("error", "bad_request");
         body.put("message", ex.getBindingResult().getAllErrors().stream()
                 .findFirst()
-                .map(e -> e.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .orElse("Validation error"));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
