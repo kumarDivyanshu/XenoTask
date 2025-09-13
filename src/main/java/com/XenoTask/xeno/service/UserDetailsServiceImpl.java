@@ -2,6 +2,7 @@ package com.xenotask.xeno.service;
 
 import com.xenotask.xeno.entity.User;
 import com.xenotask.xeno.repository.UserRepository;
+import com.xenotask.xeno.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,7 +24,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return new org.springframework.security.core.userdetails.User(
+        return new UserPrincipal(
+                user.getId(),
                 user.getEmail(),
                 user.getPasswordHash(),
                 getAuthorities()
@@ -35,4 +37,3 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 }
-
