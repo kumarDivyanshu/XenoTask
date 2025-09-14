@@ -1,7 +1,9 @@
 package com.xenotask.xeno.controller;
 
+import com.xenotask.xeno.entity.Product;
 import com.xenotask.xeno.security.UserPrincipal;
 import com.xenotask.xeno.service.AnalyticsService;
+import com.xenotask.xeno.service.ProductService;
 import com.xenotask.xeno.service.UserTenantAccessService;
 import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +26,12 @@ public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
     private final UserTenantAccessService userTenantAccessService;
+    private final ProductService productService;
 
-    public AnalyticsController(AnalyticsService analyticsService, UserTenantAccessService userTenantAccessService) {
+    public AnalyticsController(AnalyticsService analyticsService, UserTenantAccessService userTenantAccessService, ProductService productService) {
         this.analyticsService = analyticsService;
         this.userTenantAccessService = userTenantAccessService;
+        this.productService = productService;
     }
 
     @GetMapping("/revenue")
@@ -71,6 +75,17 @@ public class AnalyticsController {
         }
 
         return ResponseEntity.ok(analyticsService.topCustomers(tenant, limit));
+    }
+
+    @GetMapping("/customers/stockout")
+    public ResponseEntity<List<Map<String,Object>>> stockout(@RequestHeader("X-Tenant-ID") String tenant,
+                                                             @RequestParam(defaultValue = "5") @Min(1) int limit) {
+        if (!hasAccessToTenant(tenant)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<Map<String,Object>> items = productService.getStockOutProducts(tenant, limit);
+        return ResponseEntity.ok(items);
+
     }
 
     private boolean hasAccessToTenant(String tenantId) {

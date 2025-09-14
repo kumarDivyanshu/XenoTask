@@ -1,8 +1,12 @@
 package com.xenotask.xeno.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.xenotask.xeno.repository.ProductVariantRepository;
+import com.xenotask.xeno.repository.projection.ProductStockRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,7 +14,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -18,11 +24,14 @@ public class ProductService {
 
     private final ShopifyApiService shopifyApiService;
     private final ProductUpsertService productUpsertService;
+    private final ProductVariantRepository productVariantRepository;
 
     public ProductService(ShopifyApiService shopifyApiService,
-                          ProductUpsertService productUpsertService) {
+                          ProductUpsertService productUpsertService,
+                          ProductVariantRepository productVariantRepository) {
         this.shopifyApiService = shopifyApiService;
         this.productUpsertService = productUpsertService;
+        this.productVariantRepository = productVariantRepository;
     }
 
     @Transactional
@@ -75,5 +84,21 @@ public class ProductService {
         } while (cursor != null);
         log.info("Incremental products synced tenant={} count={} updated_at_min={}", tenantId, total, updatedAtMin);
         return total;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String,Object>> getStockOutProducts(String tenantId, int limit) {
+        int effectiveLimit = limit <= 0 ? 5 : limit;
+        Pageable pageable = PageRequest.of(0, effectiveLimit);
+        List<ProductStockRow> rows = productVariantRepository.findLowestStockProducts(tenantId, pageable);
+        return rows.stream()
+                .map(r -> {
+                    Map<String,Object> m = new HashMap<>();
+                    m.put("productId", r.getProductId());
+                    m.put("title", r.getTitle());
+                    m.put("quantity", r.getQty());
+                    return m;
+                })
+                .collect(Collectors.toList());
     }
 }
