@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class UserTenantAccessService {
 
     private static final String ERR_NO_ACCESS = "User does not have access to this tenant";
+    private static final String ROLE_ADMIN = "admin";
 
     private final UserTenantAccessRepository userTenantAccessRepository;
     private final UserRepository userRepository;
@@ -72,7 +73,7 @@ public class UserTenantAccessService {
         UserTenantAccess userTenantAccess = UserTenantAccess.builder()
                 .user(user)
                 .tenant(tenant)
-                .role(role != null ? role : "admin")
+                .role(role != null ? role : ROLE_ADMIN)
                 .build();
 
         return userTenantAccessRepository.save(userTenantAccess);
@@ -199,5 +200,12 @@ public class UserTenantAccessService {
             return shopDomain.substring(0, shopDomain.indexOf("."));
         }
         return shopDomain;
+    }
+
+    public boolean isOwner(String tenantId, Integer userId) {
+        return userTenantAccessRepository
+                .findByUserIdAndTenantTenantId(userId, tenantId)
+                .map(uta -> ROLE_ADMIN.equalsIgnoreCase(uta.getRole()))
+                .orElse(false);
     }
 }

@@ -4,6 +4,11 @@ import com.xenotask.xeno.entity.Tenant;
 import com.xenotask.xeno.repository.TenantRepository;
 import com.xenotask.xeno.exception.TenantNotFoundException;
 import com.xenotask.xeno.security.CryptoService;
+import com.xenotask.xeno.security.UserPrincipal;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,15 +18,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TenantService {
     private final TenantRepository tenantRepository;
     private final CryptoService cryptoService;
+    private final UserTenantAccessService userTenantAccessService;
 
-    public TenantService(TenantRepository tenantRepository, CryptoService cryptoService) {
-        this.tenantRepository = tenantRepository;
-        this.cryptoService = cryptoService;
-    }
 
     public Tenant getRequiredByTenantId(String tenantId) {
         return tenantRepository.findById(tenantId)
@@ -70,4 +73,32 @@ public class TenantService {
     public List<Tenant> listActiveTenants() {
         return tenantRepository.findAllByIsActiveTrue();
     }
+
+    @Transactional
+    public void deboardTenant(String tenantId) {
+        Integer userId = currentUserId();
+        if (!userTenantAccessService.isOwner(tenantId, userId)) {
+            throw new AccessDeniedException("Only the owner can delete this tenant.");
+        }
+        Tenant tenant = getRequiredByTenantId(tenantId);
+        tenantRepository.delete(tenant);
+    }
+
+    private Integer currentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new AccessDeniedException("Unauthenticated.");
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof UserPrincipal up) {
+            return up.getUserId();
+        }
+        try {
+            return Integer.valueOf(auth.getName());
+        } catch (NumberFormatException ex) {
+            throw new AccessDeniedException("Invalid authentication principal");
+        }
+    }
+
+
 }
