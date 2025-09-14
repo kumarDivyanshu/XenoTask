@@ -88,6 +88,58 @@ public class AnalyticsController {
 
     }
 
+    @GetMapping("/aov")
+    public ResponseEntity<Map<String,Object>> aov(@RequestHeader("X-Tenant-ID") String tenant,
+                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        if (!hasAccessToTenant(tenant)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(analyticsService.aov(tenant, start, end));
+    }
+
+    @GetMapping("/upt")
+    public ResponseEntity<Map<String,Object>> upt(@RequestHeader("X-Tenant-ID") String tenant,
+                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        if (!hasAccessToTenant(tenant)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(analyticsService.upt(tenant, start, end));
+    }
+
+    @GetMapping("/products/top")
+    public ResponseEntity<List<Map<String,Object>>> topProducts(@RequestHeader("X-Tenant-ID") String tenant,
+                                                                @RequestParam(defaultValue = "revenue") String by,
+                                                                @RequestParam(defaultValue = "5") @Min(1) int limit,
+                                                                @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                                @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        if (!hasAccessToTenant(tenant)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(analyticsService.topProducts(tenant, by, limit, start, end));
+    }
+
+    @GetMapping("/customers/new-vs-returning")
+    public ResponseEntity<Map<String,Object>> newVsReturning(@RequestHeader("X-Tenant-ID") String tenant,
+                                                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        if (!hasAccessToTenant(tenant)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(analyticsService.newVsReturning(tenant, start, end));
+    }
+
+    @GetMapping("/orders/cancellation-rate")
+    public ResponseEntity<Map<String,Object>> cancellationRate(@RequestHeader("X-Tenant-ID") String tenant,
+                                                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        if (!hasAccessToTenant(tenant)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(analyticsService.cancellationRate(tenant, start, end));
+    }
+
     private boolean hasAccessToTenant(String tenantId) {
         try {
             Integer userId = getCurrentUserId();
