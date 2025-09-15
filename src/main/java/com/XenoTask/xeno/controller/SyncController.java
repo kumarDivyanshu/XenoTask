@@ -2,6 +2,8 @@ package com.xenotask.xeno.controller;
 
 import com.xenotask.xeno.service.DataSyncService;
 import com.xenotask.xeno.service.SyncService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@Tag(name = "Sync", description = "Manual data sync endpoints")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/sync")
 @RequiredArgsConstructor

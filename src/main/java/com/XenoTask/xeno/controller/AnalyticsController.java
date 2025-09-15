@@ -5,6 +5,8 @@ import com.xenotask.xeno.security.UserPrincipal;
 import com.xenotask.xeno.service.AnalyticsService;
 import com.xenotask.xeno.service.ProductService;
 import com.xenotask.xeno.service.UserTenantAccessService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@Tag(name = "Analytics", description = "Analytics KPIs and reports")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/analytics")
 public class AnalyticsController {
